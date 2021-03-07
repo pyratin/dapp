@@ -1,0 +1,52 @@
+[
+  {
+    "customCode": 4001,
+    "message": "password must contain 6 to 20 at least one numeric digit, one uppercase and one lowercase letter"
+  },
+  {
+    "customCode": 4002,
+    "message": "invalid phoneNo"
+  },
+  {
+    "customCode": 4003,
+    "message": "user with the same email already exists"
+  },
+  {
+    "customCode": 4004,
+    "message": "token expired"
+  },
+  {
+    "customCode": 4005,
+    "message": "userId does not exists"
+  },
+  {
+    "customCode": 4006,
+    "message": "merchant does not exists"
+  },
+  {
+    "customCode": 4007,
+    "message": "incorrect password"
+  },
+  {
+    "customCode": 4008,
+    "message": "transaction already verified"
+  },
+  {
+    "customCode": 4009,
+    "message": "user with the same phoneNo already exists"
+  },
+  {
+    "customCode": 4010,
+    "message": "user already registered"
+  },
+
+  {
+    "customCode": 3001,
+    "message": "something went wrong",
+  }
+
+  {
+    "customCode": 2001,
+    "message": "awaiting for wallet address"
+  }
+]
