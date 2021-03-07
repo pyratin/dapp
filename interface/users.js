@@ -1,5 +1,6 @@
-const util = require("../utils/util");
 const belriumJS = require('belrium-js');
+
+const util = require("../utils/util");
 const httpCall = require('../utils/httpCall.js');
 const constants = require('../utils/constants.js');
 
@@ -13,7 +14,7 @@ app.route.put('/user',  async function (req) {
 
   var options = {
     type: 1000,
-    fee: String(constants.fees.registerUsers * constants.fixedPoint),
+    fee: '100000000',
     args: JSON.stringify([fName, lName, email])
   };
 
