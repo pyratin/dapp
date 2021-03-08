@@ -1,17 +1,17 @@
 {
-  "name": "belrium-sidechain",
-  "link": "https://github.com/salinsunny2/bel-sidechain/archive/master.zip",
+  "name": "basic",
+  "link": "https://github.com/pyratin/dapp/archive/master.zip",
   "category": 1,
-  "description": "A test demo for belrium dapp",
+  "description": "basic",
   "tags": "belrium,dapp,demo",
   "icon": "http://o7dyh3w0x.bkt.clouddn.com/hello.png",
   "type": 0,
   "delegates": [
-    "db18d5799944030f76b6ce0879b1ca4b0c2c1cee51f53ce9b43f78259950c2fd",
-    "590e28d2964b0aa4d7c7b98faee4676d467606c6761f7f41f99c52bb4813b5e4",
-    "bfe511158d674c3a1e21111223a49770bee93611d998e88a5d2ea3145de2b68b",
-    "7bbf62931cf3c596591a580212631aff51d6bc0577c54769953caadb23f6ab00",
-    "452df9213aedb3b9fed6db3e2ea9f49d3db226e2dac01828bc3dcd73b7a953b4"
+    "6f293cfe29cef731b9d96e96bf8377065f6219836ef515fd33194d7db4679241", 
+    "5180a35c98ac9e4b7684b4cf1f5de5e06c471316d6cbd1f8e75b44178759d49d", 
+    "62c0af5134f9de9b96ca7cbd172d07476c310ccf7f3052681a7d311a2dca7f33", 
+    "a11f44539d12028b9df18acf984a55d3580c32e714e95ba4c3bbd8fff1043bfc", 
+    "486d3313f8667bf23a7ddf6b6d78afcdad47809322507a8333c9a36b2795a967"
   ],
   "unlockDelegates": 3
 }
