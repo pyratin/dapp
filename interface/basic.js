@@ -1,9 +1,10 @@
 const belriumJS = require('belrium-js');
 
 const httpCall = require('../utils/httpCall.js');
-const constants = require('../utils/constants.js');
 
 app.route.get('/basic/load',  async function () {
+
+  let secret = 'frozen hour curious thunder relief accuse soccer region resource marine juice chicken';
 
   let dappId = __dirname.split(
     /\//
@@ -22,7 +23,7 @@ app.route.get('/basic/load',  async function () {
 
   let transaction = belriumJS.dapp.createInnerTransaction(
     options, 
-    constants.secret
+    secret
   );
 
   let params = { 
@@ -36,5 +37,4 @@ app.route.get('/basic/load',  async function () {
   );
 
   return res;
-})
-
+});

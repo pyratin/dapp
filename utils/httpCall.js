@@ -20,7 +20,7 @@ module.exports = {
 			url: URL + '' + url_path,
 			headers:{
 				'Content-Type':'application/json',
-				'magic': constants.magic,
+				'magic': '594fe0f3',
 				'version': ''
 			},
 			body: JSON.stringify(payload)
