@@ -5,6 +5,6 @@ module.exports = function () {
 
   app.registerContract(
     1000,
-    'users.registerUsers'
+    'basic.init'
   );
 };

@@ -4,18 +4,14 @@ const util = require("../utils/util");
 const httpCall = require('../utils/httpCall.js');
 const constants = require('../utils/constants.js');
 
-app.route.put('/user',  async function (req) {
-
-  let fName = req.query.fName;
-  let lName = req.query.lName;
-  let email = req.query.email
+app.route.get('/init',  async function (req) {
 
   let dappId = util.getDappID();
 
   var options = {
     type: 1000,
     fee: '100000000',
-    args: JSON.stringify([fName, lName, email])
+    args: JSON.stringify(['running'])
   };
 
   let transaction = belriumJS.dapp.createInnerTransaction(options, constants.admin.secret);
