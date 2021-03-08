@@ -3,7 +3,17 @@
   "height": 1,
   "pointId": null,
   "pointHeight": null,
-  "transactions": [],
+  "transactions": [
+    {
+      "fee": "0",
+      "timestamp": 0,
+      "senderPublicKey": "a7cfd49d25ce247568d39b17fca221d9b2ff8402a9f6eb6346d2291a5c81374c",
+      "type": 3,
+      "args": "[\"BEL\",\"100000\",\"ADkf34HdK6uePEr3vdEF2AoMXGeYg6gV3KIN\"]",
+      "signature": "bd1245c2e266aca76edad67cce24d0733a231ad075dfe8f32fc6f01a7bd644a452314ea547bee8bfb4bca2ba75440498aab5177041f64aa4a7a7b26f1cd36c04",
+      "id": "8bb233c5310aab8e1eb0c049318f48e4bc55ae344a38d08970011fceb6fd01ca"
+    }
+  ],
   "timestamp": 0,
   "payloadLength": 0,
   "payloadHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
