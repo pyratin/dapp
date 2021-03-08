@@ -2,7 +2,7 @@ var constants = require('../utils/constants.js');
 
 module.exports = {
 
-  init: function(
+  load: function(
     status
   ) {
 

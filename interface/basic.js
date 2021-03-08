@@ -4,7 +4,7 @@ const util = require("../utils/util");
 const httpCall = require('../utils/httpCall.js');
 const constants = require('../utils/constants.js');
 
-app.route.get('/init',  async function (req) {
+app.route.get('/basic',  async function () {
 
   let dappId = util.getDappID();
 

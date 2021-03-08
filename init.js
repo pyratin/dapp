@@ -5,6 +5,6 @@ module.exports = function () {
 
   app.registerContract(
     1000,
-    'basic.init'
+    'basic.load'
   );
 };
