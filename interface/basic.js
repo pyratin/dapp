@@ -4,7 +4,7 @@ const httpCall = require('../utils/httpCall.js');
 
 app.route.get('/basic/load',  async function () {
 
-  let secret = 'sentence weasel match weather apple onion release keen lens deal fruit matrix';
+  let secret = 'strong nephew series vintage venture dignity identify protect clever asset yellow sea';
 
   let dappId = __dirname.split(
     /\//
