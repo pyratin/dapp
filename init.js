@@ -7,4 +7,6 @@ module.exports = function () {
     1000,
     'basic.load'
   );
+
+  app.setDefaultFee(0, 'BEL');
 };

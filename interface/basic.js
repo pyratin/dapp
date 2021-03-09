@@ -4,7 +4,7 @@ const httpCall = require('../utils/httpCall.js');
 
 app.route.get('/basic/load',  async function () {
 
-  let secret = 'frozen hour curious thunder relief accuse soccer region resource marine juice chicken';
+  let secret = 'sentence weasel match weather apple onion release keen lens deal fruit matrix';
 
   let dappId = __dirname.split(
     /\//
@@ -17,7 +17,7 @@ app.route.get('/basic/load',  async function () {
 
   var options = {
     type: 1000,
-    fee: '100000000',
+    fee: '0',
     args: JSON.stringify(['running'])
   };
 
