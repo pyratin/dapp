@@ -15,8 +15,6 @@ app.route.get('/basic/load',  async function () {
       0
     ];
 
-  let fee = String(constants.fees.registerResult * constants.fixedPoint);
-
   var options = {
     type: 1000,
     fee: '0',
