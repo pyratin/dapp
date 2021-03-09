@@ -17,7 +17,7 @@ app.route.get('/basic/load',  async function () {
 
   var options = {
     type: 1000,
-    fee: '100000000',
+    fee: '0',
     args: JSON.stringify(['running'])
   };
 
