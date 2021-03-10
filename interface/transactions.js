@@ -1,269 +1,781 @@
-var crypto = require('crypto');
-var belriumJS = require('belrium-js');
-var ed = require('../utils/ed.js');
-var httpCall = require('../utils/httpCall.js');
-var constants = require('../utils/constants.js');
-var schema = require('../schema/transactions.js');
-var addressHelper = require('../utils/address.js');
-var z_schema = require('../utils/zschema-express.js');
-var TransactionTypes = require('../utils/transaction-types.js');
+'use strict';
+/* global app */
+
+const crypto = require('crypto');
+const belriumJS = require('belrium-js');
+const ed = require('../utils/ed.js');
+const httpCall = require('../utils/httpCall.js');
+const constants = require('../utils/constants.js');
+const schema = require('../schema/transactions.js');
+const addressHelper = require('../utils/address.js');
+const z_schema = require('../utils/zschema-express.js');
+const TransactionTypes = require('../utils/transaction-types.js');
 
 // OutTransfer
-app.route.put('/transaction/withdrawal', async function (req, cb) {
-    var validateSchema = await z_schema.validate(req.query, schema.outTransfer);
+app.route.put(
+  '/transaction/withdrawal', 
+  async function (
+    req,
+  ) {
 
-    var ac_params = {
-        secret: req.query.secret,
-        countryCode: req.query.countryCode
+    await z_schema.validate(req.query, schema.outTransfer);
+
+    const ac_params = {
+      secret: req.query.secret,
+      countryCode: req.query.countryCode
     };
-    var response = await httpCall.call('POST', `/api/accounts/open`, ac_params);
 
-    if(response && !response.success) {
-        return response;
+    const response = await httpCall.call(
+      'POST', 
+      '/api/accounts/open', 
+      ac_params
+    );
+
+    if(
+      response && 
+      !response.success
+    ) {
+
+      return response;
     }
 
-    if(response && response.account) {
+    if(
+      response && 
+      response.account
+    ) {
 
-        if(!response.account.status) {
-            return {error: "wallet not verified!"};
-        }
+      if(
+        !response.account.status
+      ) {
 
-        let fee = String(constants.fees.outTransfer * constants.fixedPoint);
-        let type = TransactionTypes.OUT_TRANSFER; // withdraw money to mainchain
-        let options = {
-            fee: fee,
-            type: type,
-            args: JSON.stringify([constants.defaultCurrency, String(req.query.amount)])
+        return {
+          error: 'wallet not verified!'
         };
-        let secret = req.query.secret;
+      }
 
-        let transaction = belriumJS.dapp.createInnerTransaction(options, secret);
+      const fee = String(
+        constants.fees.outTransfer * 
+        constants.fixedPoint
+      );
 
-        let dappId = req.query.dappId;
+      const type = TransactionTypes.OUT_TRANSFER;
 
-        let params = {
-            transaction: transaction
-        };
-
-        /*var data = {
-           secret: secret,
-           fee: fee,
-           type: type,
-           args: JSON.stringify([constants.defaultCurrency, String(req.query.amount)])
-        };*/
-        console.log("outTransfer data: ", params);
-        var res = await httpCall.call('PUT', `/api/dapps/${dappId}/transactions/signed`, params);
-
-        return res;
-
-    } else {
-        return response;
-    }
-});
-
-// InTransfer (Internal transfer in DAPP)
-app.route.put('/transaction/inTransfer', async function (req, cb) {
-    var validateSchema = await z_schema.validate(req.query, schema.inTransfer);
-
-    var hash = crypto.createHash('sha256').update(req.query.secret, 'utf8').digest();
-    var keypair = ed.MakeKeypair(hash);
-    var publicKey = keypair.publicKey.toString('hex');
-    var senderId = addressHelper.generateBase58CheckAddress(publicKey);
-    var recipientId = req.query.recipientId;
-
-    if (req.query.publicKey) {
-        if (publicKey != req.query.publicKey) {
-            return {error: "Invalid passphrase"};
-        }
-    }
-
-    if(req.query.recepientCountryCode != addressHelper.getCountryCodeFromAddress(recipientId)) {
-        return {msg: "Recipient country code mismatched!"};
-    }
-
-    recipientId = recipientId.slice(0, -2);
-
-    var response = await httpCall.call('GET', `/api/accounts/info?address=${[senderId, recipientId]}`);
-
-    if(response && response.info && !response.info.length) {
-        return {msg: "Account not found"};
-    }
-
-    if(response.info.map(function(obj) { return obj.address; }).indexOf(recipientId) < 0) {
-        return {msg: "Recipient not found"};
-    }
-
-    if(response.info.map(function(obj) { return obj.address; }).indexOf(senderId) < 0) {
-        return {msg: "Sender not found"};
-    }
-
-    for(i=0; i<response.info.length; i++) {
-        var data = response.info[i];
-        if(data.address == senderId) {
-            if(data.countryCode != req.query.senderCountryCode) {
-                return {msg: "Sender country code mismatched!"};
-            }
-            if(!data.status) {
-                return {msg: "Sender wallet not verified!"};
-            }
-        }
-        if(data.address == recipientId) {
-            if(data.countryCode != req.query.recepientCountryCode) {
-                return {msg: "Recipient country code mismatched!"};
-            }
-            if(!data.status) {
-                return {msg: "Recipient wallet not verified!"};
-            }
-        }
-    }
-
-    let fee = String(constants.fees.inTransfer * constants.fixedPoint);
-    let type = TransactionTypes.IN_TRANSFER; // transaction within sidechain
-    let options = {
+      const options = {
         fee: fee,
         type: type,
-        args: JSON.stringify([constants.defaultCurrency, String(req.query.amount), recipientId])
-    }
-    let secret = req.query.secret;
+        args: JSON.stringify(
+          [
+            constants.defaultCurrency, 
+            String(req.query.amount)
+          ]
+        )
+      };
 
-    let transaction = belriumJS.dapp.createInnerTransaction(options, secret);
+      const secret = req.query.secret;
 
-    let dappId = req.query.dappId;
+      const transaction = belriumJS.dapp
+        .createInnerTransaction(
+          options, 
+          secret
+        );
 
-    let params = {
+      const dappId = req.query.dappId;
+
+      const params = {
         transaction: transaction
+      };
+
+      const res = await httpCall.call(
+        'PUT', 
+        `
+          /api/dapps/${
+            dappId
+          }/transactions/signed
+        `
+          .trim(), 
+        params
+      );
+
+      return res;
+    } 
+
+    else {
+
+      return response;
+    }
+  }
+);
+
+// InTransfer (Internal transfer in DAPP)
+app.route.put(
+  '/transaction/inTransfer', 
+  async (
+    req
+  ) => {
+
+    await z_schema.validate(
+      req.query, 
+      schema.inTransfer
+    );
+
+    const hash = crypto.createHash(
+      'sha256'
+    )
+      .update(
+        req.query.secret, 
+        'utf8'
+      )
+      .digest();
+
+    const keypair = ed.MakeKeypair(
+      hash
+    );
+
+    const publicKey = keypair.publicKey
+      .toString(
+        'hex'
+      );
+
+    const senderId = addressHelper.generateBase58CheckAddress(
+      publicKey
+    );
+
+    let recipientId = req.query.recipientId;
+
+    if (
+      req.query.publicKey
+    ) {
+
+      if (
+        publicKey != 
+        req.query.publicKey
+      ) {
+
+        return {
+          error: 'Invalid passphrase'
+        };
+      }
+    }
+
+    if(
+      req.query.recepientCountryCode != 
+      (
+        addressHelper.getCountryCodeFromAddress(
+          recipientId
+        )
+      )
+    ) {
+
+      return {
+        msg: 'Recipient country code mismatched!'
+      };
+    }
+
+    recipientId = recipientId.slice(
+      0, -2
+    );
+
+    var response = await httpCall.call(
+      'GET', 
+      `
+        /api/accounts/info?address=${
+          [
+            senderId, 
+            recipientId
+          ]
+        }
+      `
+        .trim()
+    );
+
+    if(
+      response && 
+      response.info && 
+      (
+        !response.info
+          .length
+      )
+    ) {
+
+      return {
+        msg: 'Account not found'
+      };
+    }
+
+    if(
+      (
+        response.info
+          .map(
+            (
+              obj
+            ) => { 
+              return obj.address; 
+            }
+          )
+          .indexOf(recipientId)
+      ) < 
+      0
+    ) {
+
+      return {
+        msg: 'Recipient not found'
+      };
+    }
+
+    if(
+      (
+        response.info
+          .map(
+            (
+              obj
+            ) => { 
+              return obj.address; 
+            }
+          )
+          .indexOf(senderId)
+      ) < 
+      0
+    ) {
+
+      return {
+        msg: 'Sender not found'
+      };
+    }
+
+    for(
+      let i = 0; 
+      i < response.info.length; 
+      i++
+    ) {
+
+      const data = response.info[
+        i
+      ];
+
+      if(
+        data.address == senderId
+      ) {
+
+        if(
+          data.countryCode != 
+          req.query.senderCountryCode
+        ) {
+
+          return {
+            msg: 'Sender country code mismatched!'
+          };
+        }
+
+        if(
+          !data.status
+        ) {
+
+          return {
+            msg: 'Sender wallet not verified!'
+          };
+        }
+      }
+
+      if(
+        data.address == 
+        recipientId
+      ) {
+
+        if(
+          data.countryCode != 
+          req.query.recepientCountryCode
+        ) {
+
+          return {
+            msg: 'Recipient country code mismatched!'
+          };
+        }
+
+        if(
+          !data.status
+        ) {
+
+          return {
+            msg: 'Recipient wallet not verified!'
+          };
+        }
+      }
+    }
+
+    const fee = String(
+      constants.fees.inTransfer * 
+      constants.fixedPoint
+    );
+
+    const type = TransactionTypes.IN_TRANSFER;
+
+    const options = {
+      fee: fee,
+      type: type,
+      args: JSON.stringify(
+        [
+          constants.defaultCurrency, 
+          String(
+            req.query
+              .amount
+          ), 
+          recipientId
+        ]
+      )
     };
 
-    /*let newData = {
-        secret: secret,
-        fee: fee,
-        type: type, // internal transfer
-        args: JSON.stringify([constants.defaultCurrency, String(req.query.amount), recipientId])
-    };*/
-    console.log("inTransfer data: ", params);
-    var res = await httpCall.call('PUT', `/api/dapps/${dappId}/transactions/signed`, params);
+    const secret = req.query.secret;
+
+    const transaction = belriumJS.dapp
+      .createInnerTransaction(
+        options, 
+        secret
+      );
+
+    const dappId = req.query.dappId;
+
+    const params = {
+      transaction: transaction
+    };
+
+    const res = await httpCall.call(
+      'PUT', 
+      `
+        /api/dapps/${
+          dappId
+        }/transactions/signed
+      `
+        .trim(), 
+      params
+    );
 
     return res;
-});
+  }
+);
 
 // Get Unconfirmed Transactions
-app.route.get('/transaction/unconfirmed',  async function (req) {
-    var dappId = req.query.dappId;
-    var offset = (req.query.offset)? req.query.offset: 0;
-    var limit = (req.query.limit)? req.query.limit: 20;
+app.route.get(
+  '/transaction/unconfirmed',  
+  async function (
+    req
+  ) {
 
-    var res = await httpCall.call('GET', `/api/dapps/${dappId}/transactions/unconfirmed?offset=${offset}&limit=${limit}`);
-    var addresses = new Set();
+    const dappId = req.query.dappId;
 
-    res.transactions.forEach(function(trs, index) {
-        trs.args = JSON.parse(trs.args);
-        trs.recipientId = addressHelper.isBase58CheckAddress(trs.args[trs.args.length-1])? trs.args[trs.args.length-1]: null;
-        trs.currency = trs.args[0];
-        trs.amount = parseInt(trs.args[1]);
+    const offset = (req.query.offset)? req.query.offset: 0;
 
-        addresses.add(trs.senderId);
-        addresses.add(trs.recipientId);
-        delete trs.args;
-    });
+    const limit = (req.query.limit)? req.query.limit: 20;
 
-    var response = await httpCall.call('GET', `/api/accounts/info?address=${addresses}`);
+    const res = await httpCall.call(
+      'GET', 
+      `
+        /api/dapps/${
+          dappId
+        }/transactions/unconfirmed?offset=${
+          offset
+        }&limit=${
+          limit
+        }
+      `
+        .trim()
+    );
 
-    if(!response) {
-        return response;
+    const addresses = new Set();
+
+    res.transactions
+      .forEach(
+        (
+          trs
+        ) => {
+
+          trs.args = JSON.parse(
+            trs.args
+          );
+
+          trs.recipientId = addressHelper.isBase58CheckAddress(
+            trs.args[trs.args.length-1]
+          ) ? 
+            trs.args[trs.args.length-1] : 
+            null;
+
+          trs.currency = trs.args[
+            0
+          ];
+
+          trs.amount = parseInt(
+            trs.args[
+              1
+            ]
+          );
+
+          addresses.add(
+            trs.senderId
+          );
+
+          addresses.add(
+            trs.recipientId
+          );
+
+          delete trs.args;
+        }
+      );
+
+    const response = await httpCall.call(
+      'GET', 
+      `
+        /api/accounts/info?address=${
+          addresses
+        }
+      `
+        .trim()
+    );
+
+    if(
+      !response
+    ) {
+
+      return response;
     }
 
-    response.info.forEach(function(row, index1) {
-        res.transactions.forEach(function(trs, index2) {
-            if(row.address == trs.senderId) {
-                trs.senderCountryCode = row.countryCode;
-                trs.senderId = trs.senderId + ((row && row.countryCode)? row.countryCode: '');
-            }
-            if(row.address == trs.recipientId) {
-                trs.recepientCountryCode = row.countryCode;
-                trs.recipientId = trs.recipientId + ((row && row.countryCode)? row.countryCode: '');
-                //trs.args[trs.args.length-1] = addressHelper.isBase58CheckAddress(trs.args[trs.args.length-1])? trs.args[trs.args.length-1].concat((row && row.countryCode)? row.countryCode: ''): null;
-            }
-        });
-    });
+    response.info
+      .forEach(
+        function(
+          row
+        ) {
+
+          res.transactions
+            .forEach(
+              function(
+                trs
+              ) {
+
+                if(
+                  row.address == 
+                  trs.senderId
+                ) {
+
+                  trs.senderCountryCode = row.countryCode;
+
+                  trs.senderId = trs.senderId + 
+                    (
+                      (
+                        row && 
+                        row.countryCode
+                      ) ? 
+                        row.countryCode : 
+                        ''
+                    );
+                }
+
+                if(
+                  row.address == 
+                  trs.recipientId
+                ) {
+
+                  trs.recepientCountryCode = row.countryCode;
+
+                  trs.recipientId = trs.recipientId + 
+                    (
+                      (
+                        row && 
+                        row.countryCode
+                      ) ? 
+                        row.countryCode : 
+                        ''
+                    );
+                }
+              }
+            );
+        }
+      );
 
     return res;
-});
+  }
+);
 
 // Get Transactions by transactionId
-app.route.get('/transaction/confirmed',  async function (req) {
-    var dappId = req.query.dappId;
-    var offset = (req.query.offset)? req.query.offset: 0;
-    var limit = (req.query.limit)? req.query.limit: 20;
+app.route.get(
+  '/transaction/confirmed',  
+  async (
+    req
+  ) => {
 
-    var res = await httpCall.call('GET', `/api/dapps/${dappId}/transactions?offset=${offset}&limit=${limit}`);
-    var addresses = new Set();
+    const dappId = __dirname.split(
+      /\//
+    )
+      .slice(
+        -2
+      )[
+        0
+      ];
 
-    res.transactions.forEach(function(trs, index) {
-        trs.args = JSON.parse(trs.args);
-        trs.recipientId = addressHelper.isBase58CheckAddress(trs.args[trs.args.length-1])? trs.args[trs.args.length-1]: null;
-        trs.currency = trs.args[0];
-        trs.amount = parseInt(trs.args[1]);
+    const offset = (
+      req.query.offset
+    ) ? 
+      (
+        req.query
+          .offset
+      ) : 
+      0;
 
-        addresses.add(trs.senderId);
-        addresses.add(trs.recipientId);
-        delete trs.args;
-    });
+    const limit = (
+      req.query.limit
+    ) ? 
+      (
+        req.query
+          .limit
+      ) : 
+      20;
 
-    var response = await httpCall.call('GET', `/api/accounts/info?address=${Array.from(addresses)}`);
+    const res = await httpCall.call(
+      'GET', 
+      `
+        /api/dapps/${
+          dappId
+        }/transactions?offset=${
+          offset
+        }&limit=${
+          limit
+        }
+      `
+        .trim()
+    );
+
+    const addresses = new Set();
+
+    res.transactions
+      .forEach(
+        (
+          trs
+        ) => {
+
+          trs.args = JSON.parse(trs.args);
+
+          trs.recipientId = (
+            addressHelper.isBase58CheckAddress(
+              trs.args[
+                trs.args.length-1
+              ]
+            )
+          ) ? 
+            trs.args[trs.args.length-1]: 
+            null;
+
+          trs.currency = trs.args[0];
+
+          trs.amount = parseInt(
+            trs.args[
+              1
+            ]
+          );
+
+          addresses.add(
+            trs.senderId
+          );
+
+          addresses.add(
+            trs.recipientId
+          );
+
+          delete trs.args;
+        }
+      );
+
+    const response = await httpCall.call(
+      'GET', 
+      `
+        /api/accounts/info?address=${
+          Array.from(
+            addresses
+          )
+        }
+      `
+        .trim()
+    );
 
     if(!response) {
-        return response;
+
+      return response;
     }
 
-    response.info.forEach(function(row, index1) {
-        res.transactions.forEach(function(trs, index2) {
-            if(row.address == trs.senderId) {
-                trs.senderCountryCode = row.countryCode;
-                trs.senderId = trs.senderId + ((row && row.countryCode)? row.countryCode: '');
+    response.info.forEach(
+      (
+        row
+      ) => {
+
+        res.transactions.forEach(
+          (
+            trs
+          ) => {
+
+            if(
+              row.address == 
+              trs.senderId
+            ) {
+
+              trs.senderCountryCode = row.countryCode;
+              trs.senderId = trs.senderId + 
+                (
+                  (
+                    row && 
+                    row.countryCode
+                  ) ? 
+                    row.countryCode : 
+                    ''
+                );
             }
-            if(row.address == trs.recipientId) {
-                trs.recepientCountryCode = row.countryCode;
-                trs.recipientId = trs.recipientId + ((row && row.countryCode)? row.countryCode: '');
-                //trs.args[trs.args.length-1] = addressHelper.isBase58CheckAddress(trs.args[trs.args.length-1])? trs.args[trs.args.length-1].concat((row && row.countryCode)? row.countryCode: ''): null;
+
+            if(
+              row.address == 
+              trs.recipientId
+            ) {
+
+              trs.recepientCountryCode = row.countryCode;
+
+              trs.recipientId = trs.recipientId + 
+                (
+                  (
+                    row && 
+                    row.countryCode
+                  ) ? 
+                    row.countryCode : 
+                    ''
+                );
             }
-        });
-    });
+          }
+        );
+      }
+    );
 
     return res;
-});
+  }
+);
 
 // Get Internal Transactions
-app.route.get('/transaction/transfers',  async function (req) {
-    var dappId = req.query.dappId;
-    var offset = (req.query.offset)? req.query.offset: 0;
-    var limit = (req.query.limit)? req.query.limit: 20;
+app.route.get(
+  '/transaction/transfers',  
+  async function (
+    req
+  ) {
 
-    var res = await httpCall.call('GET', `/api/dapps/${dappId}/transfers?offset=${offset}&limit=${limit}`);
-    var addresses = new Set();
+    const dappId = __dirname.split(
+      /\//
+    )
+      .slice(
+        -2
+      )[
+        0
+      ];
 
-    res.transfers.forEach(function(trs, index) {
+    const offset = (
+      req.query.offset
+    ) ? 
+      req.query.offset : 
+      0;
+
+    const limit = (
+      req.query.limit
+    ) ? 
+      (
+        req.query
+          .limit
+      ) : 
+      20;
+
+    const res = await httpCall.call(
+      'GET', 
+      `
+        /api/dapps/${
+          dappId
+        }/transfers?offset=${
+          offset
+        }&limit=${
+          limit
+        }
+      `
+        .trim()
+    );
+
+    const addresses = new Set();
+
+    res.transfers.forEach(
+      (
+        trs
+      ) => {
+
         addresses.add(trs.senderId);
         addresses.add(trs.recipientId);
-    });
+      }
+    );
 
-    var response = await httpCall.call('GET', `/api/accounts/info?address=${Array.from(addresses)}`);
+    const response = await httpCall.call(
+      'GET', 
+      `
+        /api/accounts/info?address=${
+          Array.from(
+            addresses
+          )
+        }
+      `
+        .trim()
+    );
 
     if(!response) {
-        return response;
+      return response;
     }
 
-    response.info.forEach(function(row, index1) {
-        res.transfers.forEach(function(trs, index2) {
-            if(row.address == trs.senderId) {
-                trs.senderCountryCode = row.countryCode;
-                trs.senderId = trs.senderId + ((row && row.countryCode)? row.countryCode: '');
-            }
-            if(row.address == trs.recipientId) {
-                trs.recepientCountryCode = row.countryCode;
-                trs.recipientId = trs.recipientId + ((row && row.countryCode)? row.countryCode: '');
-            }
-        });
-    });
+    response.info
+      .forEach(
+        (
+          row
+        ) => {
+
+          res.transfers
+            .forEach(
+              function(
+                trs
+              ) {
+
+                if(
+                  row.address == 
+                  trs.senderId
+                ) {
+
+                  trs.senderCountryCode = row.countryCode;
+
+                  trs.senderId = trs.senderId + 
+                    (
+                      (
+                        row && 
+                        row.countryCode
+                      ) ? 
+                        row.countryCode : 
+                        ''
+                    );
+                }
+
+                if(
+                  row.address == 
+                  trs.recipientId
+                ) {
+
+                  trs.recepientCountryCode = row.countryCode;
+
+                  trs.recipientId = trs.recipientId + 
+                    (
+                      (
+                        row && 
+                        row.countryCode
+                      ) ? 
+                        row.countryCode : 
+                        ''
+                    );
+                }
+              }
+            );
+        }
+      );
 
     return res;
-});
+  }
+);
