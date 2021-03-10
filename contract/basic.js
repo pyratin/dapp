@@ -1,15 +1,17 @@
-var constants = require('../utils/constants.js');
+'use strict';
+/* global app */
 
 module.exports = {
 
-  load: function(
+  load(
     status
   ) {
 
-    console.log('calling contract basics');
-
-    app.sdb.create('Basic', {
-      status
-    });
+    app.sdb.create(
+      'Basic', 
+      {
+        status
+      }
+    );
   }
 };

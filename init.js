@@ -1,12 +1,15 @@
+'use strict';
+/* global app */
 
-module.exports = function () {
-
-  console.log('init central profile dapp');
+module.exports = () => {
 
   app.registerContract(
     1000,
     'basic.load'
   );
 
-  app.setDefaultFee(0, 'BEL');
+  app.setDefaultFee(
+    0, 
+    'BEL'
+  );
 };

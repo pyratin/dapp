@@ -1,12 +1,15 @@
+'use strict';
+/* global app */
+
 const belriumJS = require('belrium-js');
 
 const httpCall = require('../utils/httpCall.js');
 
-app.route.get('/basic/load',  async function () {
+app.route.get('/basic/load',  async () => {
 
-  let secret = 'strong nephew series vintage venture dignity identify protect clever asset yellow sea';
+  const secret = 'strong nephew series vintage venture dignity identify protect clever asset yellow sea';
 
-  let dappId = __dirname.split(
+  const dappId = __dirname.split(
     /\//
   )
     .slice(
@@ -15,22 +18,22 @@ app.route.get('/basic/load',  async function () {
       0
     ];
 
-  var options = {
+  const options = {
     type: 1000,
     fee: '0',
     args: JSON.stringify(['running'])
   };
 
-  let transaction = belriumJS.dapp.createInnerTransaction(
+  const transaction = belriumJS.dapp.createInnerTransaction(
     options, 
     secret
   );
 
-  let params = { 
+  const params = { 
     transaction: transaction 
   };
 
-  var res = await httpCall.call(
+  const res = await httpCall.call(
     'PUT', 
     `/api/dapps/${dappId}/transactions/signed`, 
     params
